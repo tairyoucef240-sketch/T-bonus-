@@ -1,4 +1,5 @@
 
+
 name: Build T BONUS APK
 
 on:
@@ -9,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
 
@@ -21,12 +24,15 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: '12266719'
-          accept-android-sdk-licenses: true
-          packages: 'platform-tools, platforms;android-35, build-tools;35.0.0'
+      - name: Accept Android licenses
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          yes | "$SDKMANAGER" --licenses || true
+
+      - name: Install Android packages
+        run: |
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
       - name: Extract project
         run: unzip -o T-BONUS-Android-Source.zip -d .
