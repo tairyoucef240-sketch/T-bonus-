@@ -1,3 +1,4 @@
+
 name: Build T BONUS APK
 
 on:
@@ -20,10 +21,12 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: '12266719'
+          accept-android-sdk-licenses: true
+          packages: 'platform-tools, platforms;android-35, build-tools;35.0.0'
 
       - name: Extract project
         run: unzip -o T-BONUS-Android-Source.zip -d .
@@ -31,7 +34,9 @@ jobs:
       - name: Build APK
         run: gradle --no-daemon assembleDebug
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: T-BONUS-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
